@@ -22,13 +22,18 @@ $(call inherit-product, build/target/product/embedded.mk)
 # Inherit from our custom product configuration
 $(call inherit-product, vendor/omni/config/common.mk)
 
-
-PRODUCT_PACKAGES += \
-    adbd
+# Time Zone data for recovery
+PRODUCT_COPY_FILES += \
+    bionic/libc/zoneinfo/tzdata:recovery/root/system/usr/share/zoneinfo/tzdata
 
 ## Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := chiron
 PRODUCT_NAME := omni_chiron
 PRODUCT_BRAND := Xiaomi
-PRODUCT_MODEL :=  MIX 2
+PRODUCT_MODEL := MIX 2
 PRODUCT_MANUFACTURER := Xiaomi
+
+PRODUCT_BUILD_PROP_OVERRIDES += \
+    TARGET_DEVICE="chiron" \
+    BUILD_FINGERPRINT="Xiaomi/chiron/chiron:8.0.0/OPR1.170623.027/8.1.18:user/release-keys" \
+    PRIVATE_BUILD_DESC="chiron-user 8.0.0 OPR1.170623.027 8.1.18 release-keys"

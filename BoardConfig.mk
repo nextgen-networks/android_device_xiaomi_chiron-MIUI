@@ -23,19 +23,20 @@
 # *not* include it on all devices, so it is safe even with hardware-specific
 # components.
 
+PLATFORM_PATH := device/xiaomi/chiron
+
 # Architecture
 TARGET_ARCH := arm64
 TARGET_ARCH_VARIANT := armv8-a
 TARGET_CPU_ABI := arm64-v8a
 TARGET_CPU_ABI2 :=
-TARGET_CPU_VARIANT := kryo
-TARGET_CPU_SMP := true
+TARGET_CPU_VARIANT := generic
 
 TARGET_2ND_ARCH := arm
 TARGET_2ND_ARCH_VARIANT := armv7-a-neon
 TARGET_2ND_CPU_ABI := armeabi-v7a
 TARGET_2ND_CPU_ABI2 := armeabi
-TARGET_2ND_CPU_VARIANT := cortex-a53
+TARGET_2ND_CPU_VARIANT := cortex-a9
 
 ENABLE_CPUSETS := true
 ENABLE_SCHEDBOOST := true
@@ -43,19 +44,15 @@ ENABLE_SCHEDBOOST := true
 # Bootloader
 TARGET_BOOTLOADER_BOARD_NAME := msm8998
 TARGET_NO_BOOTLOADER := true
-TARGET_USES_UEFI := true
-
-# Crypto
-TARGET_HW_DISK_ENCRYPTION := true
 
 # Kernel
-BOARD_KERNEL_CMDLINE := console=ttyMSM0,115200,n8 androidboot.console=ttyMSM0 earlycon=msm_serial_dm,0xc1b0000 androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 boot_cpus=0-7 mdss-dsi-panel-orientation=180 sched_enable_hmp=1 sched_enable_power_aware=1 service_locator.enable=1 swiotlb=2048 androidboot.configfs=true androidboot.usbcontroller=a800000.dwc3 androidboot.selinux=permissive
-
 BOARD_KERNEL_BASE := 0x00000000
+BOARD_KERNEL_CMDLINE := console=ttyMSM0,115200,n8 androidboot.console=ttyMSM0 earlycon=msm_serial_dm,0xc1b0000 androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 sched_enable_hmp=1 sched_enable_power_aware=1 service_locator.enable=1 swiotlb=2048 androidboot.configfs=true androidboot.usbcontroller=a800000.dwc3 androidboot.selinux=permissive
 BOARD_KERNEL_PAGESIZE := 4096
 BOARD_KERNEL_TAGS_OFFSET := 0x01E00000
-BOARD_RAMDISK_OFFSET     := 0x02000000
-TARGET_PREBUILT_KERNEL := device/xiaomi/chiron/prebuilt/Image.gz-dtb
+BOARD_RAMDISK_OFFSET := 0x02000000
+#TARGET_PREBUILT_KERNEL := $(PLATFORM_PATH)/prebuilt/Image.gz-dtb
+TARGET_PREBUILT_KERNEL := $(PLATFORM_PATH)/prebuilt/recovery.img-kernel
 
 # Platform
 TARGET_BOARD_PLATFORM := msm8998
@@ -63,45 +60,70 @@ TARGET_BOARD_PLATFORM_GPU := qcom-adreno540
 TARGET_PLATFORM_DEVICE_BASE := /devices/soc/
 
 # Partitions
+BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 67108864
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 5368709120
+BOARD_USERDATAIMAGE_PARTITION_SIZE := 120426835968
 BOARD_FLASH_BLOCK_SIZE := 262144 # (BOARD_KERNEL_PAGESIZE * 64)
 
-BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864
-BOARD_CACHEIMAGE_PARTITION_SIZE := 268435456
-BOARD_RECOVERYIMAGE_PARTITION_SIZE := 67108864
-BOARD_SYSTEMIMAGE_PARTITION_SIZE := 3221225472
-BOARD_USERDATAIMAGE_PARTITION_SIZE := 56908316672
-BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
+# TWRP Debugging
+#TWRP_EVENT_LOGGING := true
+#TARGET_USES_LOGD := true
+#TWRP_INCLUDE_LOGCAT := true
+#TARGET_RECOVERY_DEVICE_MODULES += strace
+#TW_RECOVERY_ADDITIONAL_RELINK_FILES += $($(TARGET_OUT_OPTIONAL_EXECUTABLES)/strace
+#TW_CRYPTO_SYSTEM_VOLD_DEBUG := true
+#TW_CRYPTO_SYSTEM_VOLD_DISABLE_TIMEOUT := true
 
+# additional filesystem support
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
+TW_INCLUDE_NTFS_3G := true
+#TW_NO_EXFAT := false
+#TW_NO_EXFAT_FUSE := false
 
 # Workaround for error copying vendor files to recovery ramdisk
-BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
-TARGET_COPY_OUT_VENDOR := vendor
+#BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
+#TARGET_COPY_OUT_VENDOR := vendor
 
-# Recovery
+# Encryption
+TW_INCLUDE_CRYPTO := true
+#TARGET_CRYPTFS_HW_PATH := vendor/qcom/opensource/cryptfs_hw
+#TW_CRYPTO_USE_SYSTEM_VOLD := qseecomd
+#TARGET_KEYMASTER_WAIT_FOR_QSEE := true
+# enable/disable Qualcomm Hardware Encryption to prevent decrypt errors
+#TARGET_HW_DISK_ENCRYPTION := true
+
+# storage specific
 BOARD_HAS_LARGE_FILESYSTEM := true
-BOARD_HAS_NO_SELECT_BUTTON := true
-TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
-
-# TWRP specific build flags
 BOARD_HAS_NO_REAL_SDCARD := true
 RECOVERY_SDCARD_ON_DATA := true
-TARGET_RECOVERY_QCOM_RTC_FIX := true
-TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
+TW_NO_USB_STORAGE := true
 TW_EXCLUDE_DEFAULT_USB_INIT := true
-TW_EXCLUDE_SUPERSU := true
-TW_EXTRA_LANGUAGES := true
-# set default language chinese
-TW_DEFAULT_LANGUAGE := zh_CN
-TW_INCLUDE_CRYPTO := true
-TW_INCLUDE_NTFS_3G := true
-TW_INPUT_BLACKLIST := "hbtp_vm"
-TW_DEFAULT_BRIGHTNESS := 2047
-TW_MAX_BRIGHTNESS := 4095
-TW_THEME := portrait_hdpi
-TW_SCREEN_BLANK_ON_BOOT := true
-
-# Extras
 TW_IGNORE_MISC_WIPE_DATA := true
 BOARD_SUPPRESS_SECURE_ERASE := true
+
+# Display Brightness
+TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
+TW_DEFAULT_BRIGHTNESS := 2047
+TW_MAX_BRIGHTNESS := 4095
+
+# Theming & functions
+TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
+TW_SCREEN_BLANK_ON_BOOT := true
+TW_THEME := portrait_hdpi
+BOARD_HAS_NO_SELECT_BUTTON := true
+TARGET_RECOVERY_QCOM_RTC_FIX := true
+#TW_EXCLUDE_SUPERSU := true
+TW_EXTRA_LANGUAGES := true
+#TW_DEFAULT_LANGUAGE := zh_CN
+
+# Display - Disable Mouse Cursor
+TW_INPUT_BLACKLIST := "hbtp_vm"
+
+# Use ro.product.model - backup folder is named like model not like serial number (default)
+# TW_USE_MODEL_HARDWARE_ID_FOR_DEVICE_ID := true
+
+# replace autogenerated recovery.fstab with manual created & copy decryption command script to root folder
+PRODUCT_COPY_FILES +=  \
+	$(PLATFORM_PATH)/twrp.fstab.oreo:recovery/root/etc/twrp.fstab
